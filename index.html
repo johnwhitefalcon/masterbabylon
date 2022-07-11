@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=5.0">
+    <title>Document</title>
+    <style>
+        html, body {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #renderCanvas {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+    </style>
+
+
+
+ 
+</head>
+<body>
+    
+    <canvas id="renderCanvas" touch-action="none"></canvas> 
+    
+
+    <script src = "https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+
+
+<script>
+
+    const canvas = document.getElementById("renderCanvas");
+    const engine = new BABYLON.Engine(canvas, true); 
+    
+    
+    const createScene = function () {
+
+        const scene = new BABYLON.Scene(engine);  
+const camera = new BABYLON.FollowCamera("followCam", new BABYLON.Vector3(0, 0, 0), scene);
+camera.heightOffset = 15;
+camera.radius = 195;
+camera.rotationOffset = -60;
+camera.cameraAcceleration = 0.005;
+camera.maxCameraSpeed = 10;
+camera.attachControl(canvas, true);
+
+
+    //    const camera = new BABYLON.ArcRotateCamera("camera", 10,1.5,200, new BABYLON.Vector3(0, 0, 0));
+    //    camera.attachControl(canvas, true);
+        const light1 = new BABYLON.PointLight("light1", new BABYLON.Vector3(1, 1, 0));
+        light1.diffuse = new BABYLON.Color3(1,0,2)
+        light1.intensity = 1;
+        const light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(1, 1, 1));
+        light2.diffuse = new BABYLON.Color3(3,2,2)
+        light2.intensity = 1;
+        const light3 = new BABYLON.PointLight("light3", new BABYLON.Vector3(1, 4, 0));
+        light3.diffuse = new BABYLON.Color3(1,0,0)
+        light3.intensity = 1;
+     
+        
+       const envTex = new BABYLON.CubeTexture("./sky.env", scene);
+       scene.environmentTexture = envTex;
+       scene.createDefaultSkybox(envTex, true);
+
+//       BABYLON.SceneLoader.Append("./", "Barreljc.glb", scene, function (scene) {
+  
+//        });
+
+        BABYLON.SceneLoader.ImportMesh("", "./", "Barreljc.glb", scene, function (newMeshes, particleSystems, skeletons) {
+
+        camera.target = newMeshes[0];
+        newMeshes[0].position.x = 0;
+        newMeshes[0].position.z = -50;
+        newMeshes[0].position.y = -0;
+        newMeshes[0].scaling = new BABYLON.Vector3(60,60,60);
+
+    });
+
+
+        const ball =  BABYLON.MeshBuilder.CreateSphere("Ball", {diameterX: 5, diameterY: 4, diameterZ: 6})
+        ball.position.x = +5;
+
+        var redball = new BABYLON.StandardMaterial("redball", scene);
+        redball.diffuseColor = new BABYLON.Color3(0.9, 0.02, 0.02);
+        ball.material = redball;
+
+        
+        ball.actionManager = new BABYLON.ActionManager(scene);
+            ball.actionManager.registerAction(
+            new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger,
+                          
+                function () {
+                
+                    var blueball = new BABYLON.StandardMaterial("blueball", scene);
+                    blueball.diffuseColor = new BABYLON.Color3(0.5, 0.9, 0.9);
+                    ball.material = blueball
+                
+            })).then(
+
+                new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger,
+                          
+                function () {
+                
+                var redball = new BABYLON.StandardMaterial("redball", scene);
+                redball.diffuseColor = new BABYLON.Color3(0.9, 0.02, 0.02);
+                ball.material = redball;
+
+                }));
+        
+                
+
+
+        var mat = new BABYLON.StandardMaterial("", scene);
+        mat.diffuseTexture = new BABYLON.Texture("./green.jpg", scene);
+
+        const plane =  BABYLON.MeshBuilder.CreatePlane("Plane", {height: 10, width: 5})
+        plane.rotation = new BABYLON.Vector3(1, 0, 2);
+        plane.material = mat;
+
+        var mat1 = new BABYLON.StandardMaterial("", scene);
+        mat1.diffuseTexture = new BABYLON.Texture("./green.jpg", scene);
+
+        var myPoints = [
+            new BABYLON.Vector3(0, 0, -1),
+            new BABYLON.Vector3(1, 4, -2),
+            new BABYLON.Vector3(2, 5, -3),
+            new BABYLON.Vector3(3, 6, -4),
+            new BABYLON.Vector3(4, 7, -5),
+            new BABYLON.Vector3(8, 7, -6),
+        //    new BABYLON.Vector3(10, 3, 4),
+        //    new BABYLON.Vector3(12, 6, 5),
+
+        ];
+
+
+
+        var lines = BABYLON.MeshBuilder.CreateTube("lines", {path: myPoints, radius: 0.5, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene)
+        lines.material = mat1;
+
+
+    var pbr = new BABYLON.PBRMaterial("pbr", scene);
+    pbr.albedoTexture = new BABYLON.Texture("./asphalt.jpg", scene);
+
+        var ground = BABYLON.MeshBuilder.CreateBox("ground", {height: 5, width: 1025, depth: 1025}, scene)
+        ground.position = new BABYLON.Vector3(0,-50,0);
+        ground.material = pbr;
+        pbr.roughness = 1;
+
+    //testing this code to create a graph    
+    var mat3 = new BABYLON.StandardMaterial("", scene);
+    mat3.diffuseColor = new BABYLON.Color3(0.9, 0.02, 0.02);
+    
+    var jc = [0, 5, 10, 15];
+    var myPoints1 = [];
+
+for(var i = 0; i<jc.length; i++){
+    myPoints1.push(new BABYLON.Vector3(1, jc[i], -8))
+
+}
+
+    var lines = BABYLON.MeshBuilder.CreateTube("lines", {path: myPoints1, radius: 0.2, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene)
+    lines.material = mat3;
+
+
+// animation box
+
+    const box = BABYLON.MeshBuilder.CreateBox("Box", {height: 20, width: 20, depth:20});
+    box.position = new BABYLON.Vector3(-20,-5,-2)
+
+    const startFrame = 0;
+    const endFrame = 10;
+    const frameRate = 10;
+
+    const xSlide = new BABYLON.Animation("xSlide", "position", frameRate, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+    const keyFrames = [];
+
+    keyFrames.push({
+        frame: 0,
+        value: new BABYLON.Vector3(-20,-5,-2)
+
+    });
+
+    keyFrames.push({
+        frame: 5,
+        value: new BABYLON.Vector3(-20,-10,-2)
+
+    });
+
+    keyFrames.push({
+        frame: endFrame,
+        value: new BABYLON.Vector3(-20,-20,-2)
+
+    });
+
+    xSlide.setKeys(keyFrames);
+    box.animations.push(xSlide);
+    scene.beginAnimation(box, startFrame, endFrame, false);
+
+//.camera animation.................................................
+
+
+    const startFrameCam = 0;
+    const endFrameCam = 10;
+    const frameRateCam = 10;
+
+    const xCam = new BABYLON.Animation("xCam", "position", frameRate, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+    const keyFramesCam = [];
+
+    keyFramesCam.push({
+        frame: 0,
+        value: new BABYLON.Vector3(0,1.5,200)
+
+    });
+
+    keyFramesCam.push({
+        frame: 5,
+        value: new BABYLON.Vector3(-125,25,200)
+
+    });
+
+    keyFramesCam.push({
+        frame: endFrame,
+        value: new BABYLON.Vector3(-250,55,200)
+
+    });
+
+    xCam.setKeys(keyFramesCam);
+    camera.animations.push(xCam);
+    scene.beginAnimation(camera, startFrame, endFrame, false);
+
+
+    //return to nextjs
+
+    box.actionManager = new BABYLON.ActionManager(scene);
+
+    box.actionManager.registerAction(
+        new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger,
+                          
+             function (event) {
+                      var pickedMesh = event.meshUnderPointer;
+                      window.open('http://localhost:3000/')    
+                              
+                          
+                      })
+
+
+
+    )
+
+    //moving with keyboard
+    
+    const sphere = BABYLON.MeshBuilder.CreateSphere("Sphere");
+    sphere.position = new BABYLON.Vector3(-30,-25,-20);
+    sphere.scaling = new BABYLON.Vector3(30,30,30);
+
+    scene.onKeyboardObservable.add((kbinfo)=>{
+        switch(kbinfo.type){
+            case BABYLON.KeyboardEventTypes.KEYDOWN:
+            switch(kbinfo.event.key){
+                case "a":
+                case "A":
+                    sphere.position.x -= 1;
+                    break    
+                case "d":
+                case "D":
+                    sphere.position.x += 1;
+                    break
+                case "w":
+                case "W":
+                    sphere.position.y -= 1;
+                    break
+                case "s":
+                case "S":
+                    sphere.position.y += 1;
+                    break
+                case "z":
+                case "Z":
+                    sphere.position.z -= 1;
+                    break
+                case "x":
+                case "X":
+                    sphere.position.z += 1;
+                    break
+
+            }
+            break;
+        }
+
+    });
+
+// Camera to follow the moving sphere
+
+
+camera.lockedTarget = sphere;
+
+
+
+
+
+        return scene;
+    };
+
+    const scene = createScene(); 
+    
+    
+    engine.runRenderLoop(function () {
+            scene.render();
+           
+    });
+
+    
+    window.addEventListener("resize", function () {
+            engine.resize();
+    });
+</script>
+
+
+
+
+</body>
+</html>
